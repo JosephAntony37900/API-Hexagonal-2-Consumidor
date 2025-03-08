@@ -19,6 +19,7 @@ var channel *amqp.Channel
 
 // Estructura mínima para representar un pedido
 type Order struct {
+	Id         int    `json:"id"`
 	Usuario_id int    `json:"usuario_id"`
 	Producto   string `json:"producto"`
 }
