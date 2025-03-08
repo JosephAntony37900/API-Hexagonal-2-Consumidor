@@ -1,7 +1,10 @@
 package entities
 
+import "time"
+
 type Notification struct {
-	Id int
+	Id         int
 	Usuario_id int
-	Mensaje string
+	Mensaje    string
+	CreatedAt  time.Time
 }

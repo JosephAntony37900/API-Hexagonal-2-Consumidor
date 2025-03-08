@@ -9,6 +9,7 @@ import (
     notiRepo "github.com/JosephAntony37900/API-Hexagonal-1-Consumidor/notifications/infraestructure/repository"
     notiRoutes "github.com/JosephAntony37900/API-Hexagonal-1-Consumidor/notifications/infraestructure/routes"
     "github.com/gin-gonic/gin"
+	"github.com/JosephAntony37900/API-Hexagonal-1-Consumidor/notifications/infraestructure/adapters"
 
 )
 
@@ -19,8 +20,14 @@ func main () {
     }
     defer db.Close()
 
+	// Inicializar RabbitMQ
+	adapters.InitRabbitMQ()
+	defer adapters.CloseRabbitMQ()
+
 	notiRepository := notiRepo.NewNotificationRepositoryMySQL(db)
 
+// Iniciar el consumidor de RabbitMQ
+	go adapters.ConsumeCreatedOrders(notiRepository)
 	createNoti := notiApp.NewCreateNotification(notiRepository)
 	getByUserNoti := notiApp.NewGetNotificationsByUser(notiRepository)
 
@@ -37,8 +44,8 @@ func main () {
 	notiRoutes.NotificationRoutes(r, createNotiController, getByUserNotiController)
 
 	 // Iniciar servidor
-	 log.Println("Server started at :8080")
-	 if err := r.Run(":8080"); err != nil {
+	 log.Println("Server started at :8081")
+	 if err := r.Run(":8081"); err != nil {
 		 log.Fatalf("Error starting server: %v", err)
 	 }
 }

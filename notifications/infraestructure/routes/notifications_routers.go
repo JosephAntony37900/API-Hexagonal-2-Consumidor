@@ -11,6 +11,6 @@ func NotificationRoutes(router *gin.Engine, createNotificationController *contro
     })
 
     router.GET("/notifications/:usuario_id", func(c *gin.Context) {
-        getNotificationsController.GetNotificationsByUser(c.Writer, c.Request)
+        getNotificationsController.GetNotificationsByUser(c)
     })
 }

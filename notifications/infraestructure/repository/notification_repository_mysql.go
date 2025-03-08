@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/JosephAntony37900/API-Hexagonal-1-Consumidor/notifications/domain/entities"
 )
@@ -17,8 +18,8 @@ func NewNotificationRepositoryMySQL(db *sql.DB) *NotificationRepositoryMySQL {
 
 // Save almacena una notificación en la base de datos
 func (r *NotificationRepositoryMySQL) Save(notification entities.Notification) error {
-	query := "INSERT INTO notificaciones (Usuario_id, Mensaje) VALUES (?, ?)"
-	_, err := r.db.Exec(query, notification.Usuario_id, notification.Mensaje)
+	query := "INSERT INTO notificaciones (Usuario_id, Mensaje, CreatedAt) VALUES (?, ?, ?)"
+	_, err := r.db.Exec(query, notification.Usuario_id, notification.Mensaje, time.Now())
 	if err != nil {
 		return fmt.Errorf("error al guardar la notificación: %v", err)
 	}
@@ -26,9 +27,9 @@ func (r *NotificationRepositoryMySQL) Save(notification entities.Notification) e
 }
 
 // FindByUserID obtiene las notificaciones de un usuario específico
-func (r *NotificationRepositoryMySQL) FindByUserID(usuario_id int) ([]entities.Notification, error) {
-	query := "SELECT Id, Usuario_id, Mensaje FROM notificaciones WHERE Usuario_id = ?"
-	rows, err := r.db.Query(query, usuario_id)
+func (r *NotificationRepositoryMySQL) FindByUserID(usuarioID int) ([]entities.Notification, error) {
+	query := "SELECT Id, Usuario_id, Mensaje, CreatedAt FROM notificaciones WHERE Usuario_id = ? ORDER BY CreatedAt DESC"
+	rows, err := r.db.Query(query, usuarioID)
 	if err != nil {
 		return nil, fmt.Errorf("error al obtener notificaciones: %v", err)
 	}
@@ -37,9 +38,17 @@ func (r *NotificationRepositoryMySQL) FindByUserID(usuario_id int) ([]entities.N
 	var notifications []entities.Notification
 	for rows.Next() {
 		var notification entities.Notification
-		if err := rows.Scan(&notification.Id, &notification.Usuario_id, &notification.Mensaje); err != nil {
+		var createdAt string
+		if err := rows.Scan(&notification.Id, &notification.Usuario_id, &notification.Mensaje, &createdAt); err != nil {
 			return nil, fmt.Errorf("error al escanear fila: %v", err)
 		}
+
+		// Convertir CreatedAt a time.Time
+		notification.CreatedAt, err = time.Parse("2006-01-02 15:04:05", createdAt) // Ajusta el formato según tu base de datos
+		if err != nil {
+			return nil, fmt.Errorf("error al parsear CreatedAt: %v", err)
+		}
+
 		notifications = append(notifications, notification)
 	}
 
