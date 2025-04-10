@@ -16,17 +16,14 @@ import (
 
 var conn *amqp.Connection
 var channel *amqp.Channel
-
-// Estructura mínima para representar un pedido
 type Order struct {
 	Id         int    `json:"id"`
 	Usuario_id int    `json:"usuario_id"`
 	Producto   string `json:"producto"`
 }
 
-// Inicializa la conexión a RabbitMQ
 func InitRabbitMQ() {
-	// Cargar variables de entorno
+
 	err := godotenv.Load()
 	if err != nil {
 		log.Println("No se pudo cargar el archivo .env")
@@ -49,7 +46,6 @@ func InitRabbitMQ() {
 	log.Println("Conectado a RabbitMQ exitosamente")
 }
 
-// Cierra la conexión y el canal
 func CloseRabbitMQ() {
 	if channel != nil {
 		channel.Close()
@@ -59,36 +55,32 @@ func CloseRabbitMQ() {
 	}
 }
 
-// ConsumeCreatedOrders consume mensajes de la cola "created.order"
 func ConsumeCreatedOrders(repo repository.NotificationRepository) {
-	// Declarar la cola "created.order"
 	queue, err := channel.QueueDeclare(
-		"created.order", // name
-		true,            // durable
-		false,           // delete when unused
-		false,           // exclusive
-		false,           // no-wait
-		nil,             // arguments
+		"created.order",
+		true,            
+		false,           
+		false,           
+		false,           
+		nil,             
 	)
 	if err != nil {
 		log.Fatalf("Error al declarar la cola 'created.order': %s", err)
 	}
 
-	// Consumir mensajes de la cola
 	msgs, err := channel.Consume(
-		queue.Name, // queue
-		"",         // consumer
-		true,       // auto-ack
-		false,      // exclusive
-		false,      // no-local
-		false,      // no-wait
-		nil,        // args
+		queue.Name, 
+		"",         
+		true,       
+		false,      
+		false,      
+		false,      
+		nil,        
 	)
 	if err != nil {
 		log.Fatalf("Error al registrar el consumidor: %s", err)
 	}
 
-	// Procesar mensajes
 	go func() {
 		for d := range msgs {
 			var order Order
@@ -112,7 +104,6 @@ func ConsumeCreatedOrders(repo repository.NotificationRepository) {
 				colaDestino = "order.rejected"
 			}
 
-			// Guardar la notificación en la base de datos
 			notification := entities.Notification{
 				Usuario_id: order.Usuario_id,
 				Mensaje:    mensaje,
@@ -122,7 +113,6 @@ func ConsumeCreatedOrders(repo repository.NotificationRepository) {
 				continue
 			}
 
-			// Publicar el resultado en la cola correspondiente
 			if err := PublishOrderDecision(order, colaDestino); err != nil {
 				log.Printf("Error al publicar el mensaje en la cola %s: %s", colaDestino, err)
 			}
@@ -132,7 +122,6 @@ func ConsumeCreatedOrders(repo repository.NotificationRepository) {
 	}()
 }
 
-// PublishOrderDecision publica el resultado en la cola correspondiente
 func PublishOrderDecision(order Order, colaDestino string) error {
 	orderJSON, err := json.Marshal(order)
 	if err != nil {
@@ -140,10 +129,10 @@ func PublishOrderDecision(order Order, colaDestino string) error {
 	}
 
 	err = channel.Publish(
-		"",           // exchange
-		colaDestino,  // queue name
-		false,        // mandatory
-		false,        // immediate
+		"",           
+		colaDestino,  
+		false,        
+		false,       
 		amqp.Publishing{
 			ContentType: "application/json",
 			Body:        orderJSON,

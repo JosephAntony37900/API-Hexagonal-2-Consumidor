@@ -16,7 +16,6 @@ func NewNotificationRepositoryMySQL(db *sql.DB) *NotificationRepositoryMySQL {
 	return &NotificationRepositoryMySQL{db: db}
 }
 
-// Save almacena una notificación en la base de datos
 func (r *NotificationRepositoryMySQL) Save(notification entities.Notification) error {
 	query := "INSERT INTO notificaciones (Usuario_id, Mensaje, CreatedAt) VALUES (?, ?, ?)"
 	_, err := r.db.Exec(query, notification.Usuario_id, notification.Mensaje, time.Now())
@@ -26,7 +25,6 @@ func (r *NotificationRepositoryMySQL) Save(notification entities.Notification) e
 	return nil
 }
 
-// FindByUserID obtiene las notificaciones de un usuario específico
 func (r *NotificationRepositoryMySQL) FindByUserID(usuarioID int) ([]entities.Notification, error) {
 	query := "SELECT Id, Usuario_id, Mensaje, CreatedAt FROM notificaciones WHERE Usuario_id = ? ORDER BY CreatedAt DESC"
 	rows, err := r.db.Query(query, usuarioID)
@@ -44,7 +42,7 @@ func (r *NotificationRepositoryMySQL) FindByUserID(usuarioID int) ([]entities.No
 		}
 
 		// Convertir CreatedAt a time.Time
-		notification.CreatedAt, err = time.Parse("2006-01-02 15:04:05", createdAt) // Ajusta el formato según tu base de datos
+		notification.CreatedAt, err = time.Parse("2006-01-02 15:04:05", createdAt) 
 		if err != nil {
 			return nil, fmt.Errorf("error al parsear CreatedAt: %v", err)
 		}

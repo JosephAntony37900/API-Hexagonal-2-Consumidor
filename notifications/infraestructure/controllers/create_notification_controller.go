@@ -15,7 +15,6 @@ func NewCreateNotificationController(useCase *application.CreateNotification) *C
     return &CreateNotificationController{useCase: useCase}
 }
 
-// CreateNotification maneja la solicitud para crear una notificación
 func (c *CreateNotificationController) CreateNotification(w http.ResponseWriter, r *http.Request) {
     var notification struct {
         Usuario_id int    `json:"usuario_id"`

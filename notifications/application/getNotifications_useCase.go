@@ -16,7 +16,6 @@ func NewGetNotificationsByUser(repo repository.NotificationRepository) *GetNotif
 }
 
 func (g *GetNotificationsByUser) Run(usuarioID int, lastTimestamp time.Time) ([]entities.Notification, error) {
-	// Obtener las notificaciones del usuario
 	notifications, err := g.repo.FindByUserID(usuarioID)
 	if err != nil {
 		return nil, err
