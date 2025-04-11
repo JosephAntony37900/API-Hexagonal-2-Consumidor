@@ -20,6 +20,9 @@ type Order struct {
 	Id         int    `json:"id"`
 	Usuario_id int    `json:"usuario_id"`
 	Producto   string `json:"producto"`
+	Pais string `json:"pais"`
+	Entidad_federativa string `json:"entidad_federativa"`
+	Cp string `json:"cp"`
 }
 
 func InitRabbitMQ() {

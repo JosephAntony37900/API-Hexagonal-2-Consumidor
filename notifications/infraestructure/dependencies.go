@@ -12,7 +12,6 @@ import (
 
 func InitNotificationsDependencies(Engine *gin.Engine, db *sql.DB){
 	adapters.InitRabbitMQ()
-	defer adapters.CloseRabbitMQ()
 
 	notiRepository := notiRepo.NewNotificationRepositoryMySQL(db)
 
